@@ -1103,8 +1103,12 @@ activarColisionNaveEnemiga:
     RTS
 
 NMI:
-
-
+    ;-------------------------------
+    ;------------------------------
+    ;;experimentar con los fondoooos
+    ;-------------------------------
+    ;-------------------------------
+    
     ; Establecer bandera de VBlank
     LDA #$01
     STA vblank_occurred
