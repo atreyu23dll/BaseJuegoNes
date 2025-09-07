@@ -45,6 +45,8 @@ posicionRayo4Y .rs 1
 posicionNaveEnemigaX .rs 1
 posicionNaveEnemigaY .rs 1
 
+scroll_y .rs 1
+
 
 
   .bank 0
@@ -83,6 +85,7 @@ inicializarVariables:
     STA vblank_occurred
     STA estadoDeDisparo
     STA estadoNaveEnemiga1
+    STA scroll_y
 
 inicialiazarRandom:
     LDA #%10101011
@@ -1051,7 +1054,7 @@ saltarXor2:
 
 teletransportarseNaveEnemiga:
     LDA timer
-    CMP #60
+    CMP #120
     BNE cambiarCicloGeneral
 
     LDA randomX
@@ -1108,10 +1111,17 @@ NMI:
     ;;experimentar con los fondoooos
     ;-------------------------------
     ;-------------------------------
-    
+
     ; Establecer bandera de VBlank
     LDA #$01
     STA vblank_occurred
+
+    LDA #$00
+    STA $2005
+    LDA scroll_y
+    STA $2005
+
+    INC scroll_y
 
     ; Transferir datos de sprites mediante DMA
     LDA #$00
@@ -1128,7 +1138,7 @@ NMI:
   .org $E000
 paletas:
   .db $0F, $20, $16, $29
-  .db $0F, $04, $06, $2C  
+  .db $0F, $07, $06, $2C  
   .db $0F, $31, $20, $02   
   .db $0F, $06, $2A, $26   
 
