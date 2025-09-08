@@ -49,6 +49,7 @@ scroll_y .rs 1
 
 
 
+
   .bank 0
   .org $C000
 RESET:
@@ -86,6 +87,9 @@ inicializarVariables:
     STA estadoDeDisparo
     STA estadoNaveEnemiga1
     STA scroll_y
+
+    LDA #$01
+    STA estadoDeDisparo
 
 inicialiazarRandom:
     LDA #%10101011
@@ -191,7 +195,8 @@ loopAtributos:
     LDA $0203
     STA posicionNaveX
 
-;;imprimir sprite de nave enemigo
+;aparecer nave enemiga
+
     LDA #15
     STA $0208
     STA posicionNaveEnemigaY
@@ -202,7 +207,6 @@ loopAtributos:
     LDA #100
     STA $020B
     STA posicionNaveEnemigaX
-
 
 ;habilitar graficos
     LDA #%10000000
@@ -226,16 +230,10 @@ juegoPrincipal:
 
     ;logica del juego
     INC timer
-
-    ;comprobar si nave enemiga aun sigue viva
-    LDA estadoNaveEnemiga1
-    CMP #$00
-    BNE naveEnemigaDestruida
-
-
+    
+    ;funciones primarias del juego
+    JSR aparecerNaveEnemiga
     JSR dispararNaveEnemiga
-
-naveEnemigaDestruida:  ;si la nave esta destuida, salta aqui
     JSR animarDisparosEnemigos
     JSR leerControles
     JSR actualizarNave
@@ -251,11 +249,44 @@ naveEnemigaDestruida:  ;si la nave esta destuida, salta aqui
 ;;firmas y logica de componentes
 ;---------------------------
 
+;-----------------------------------
+;firma de aparicion de nave enemiga
+;----------------------------------
+aparecerNaveEnemiga:
+
+    LDA timer
+    AND #%00111100 
+    BNE naveYaApacerida
+
+    LDA estadoNaveEnemiga1
+    CMP #$01
+    BNE naveYaApacerida
+
+    LDA #15
+    STA $0208
+    STA posicionNaveEnemigaY
+    LDA #$05
+    STA $0209
+    LDA #%00000010
+    STA $020A
+    LDA #100
+    STA $020B
+    STA posicionNaveEnemigaX
+
+    LDA #$00
+    STA estadoNaveEnemiga1
+
+naveYaApacerida:
+    RTS
 ;--------------------------
 ;primera firma - Disparo nave enemiga
 ;-------------------------
 
 dispararNaveEnemiga:
+
+    LDA estadoNaveEnemiga1
+    CMP #$1
+    BEQ regresarLoop
     ;;comprobar segundo 1
     LDA timer
     CMP #60
@@ -284,6 +315,8 @@ regresarLoop:
     RTS
 
 dispararRayoE:
+
+
     LDA $0208
     STA $020C
     LDA #$06
@@ -301,6 +334,9 @@ dispararRayoE:
     RTS
 
 dispararRayoE2:
+
+   
+
     LDA $0208
     STA $0210
     LDA #$06
@@ -347,6 +383,8 @@ dispararRayoE4:
     STA posicionRayo4Y
     LDA $021B
     STA posicionRayo4X
+
+
 
     RTS
 
@@ -676,8 +714,6 @@ checarBotonDer:
     RTS
 
 DerAct:
-
-
 DerAct:
     LDA $0203
     ;chechar si se puede ir a la izquierda
@@ -1064,6 +1100,10 @@ teletransportarseNaveEnemiga:
 cambiarCicloGeneral:
     RTS
 
+;------------------------------------------------
+;novena firma - metodo para aparecer nave enemiga
+;------------------------------------------------
+
 ;-----------------------
 ;firmas de uso general
 ;------------------------
@@ -1121,7 +1161,7 @@ NMI:
     LDA scroll_y
     STA $2005
 
-    INC scroll_y
+    DEC scroll_y
 
     ; Transferir datos de sprites mediante DMA
     LDA #$00
