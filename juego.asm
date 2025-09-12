@@ -19,6 +19,7 @@ estadoDeDisparo .rs 1
 estadoNaveEnemiga1 .rs 1
 
 timer .rs 1
+timer2 .rs 1
 randomX .rs 1
 randomY .rs 1
 semillaX .rs 1
@@ -83,13 +84,13 @@ vblankwait2:
 inicializarVariables:
     LDA #$00
     STA timer
+    STA timer2
     STA vblank_occurred
     STA estadoDeDisparo
-    STA estadoNaveEnemiga1
     STA scroll_y
 
     LDA #$01
-    STA estadoDeDisparo
+    STA estadoNaveEnemiga1
 
 inicialiazarRandom:
     LDA #%10101011
@@ -197,16 +198,7 @@ loopAtributos:
 
 ;aparecer nave enemiga
 
-    LDA #15
-    STA $0208
-    STA posicionNaveEnemigaY
-    LDA #$05
-    STA $0209
-    LDA #%00000010
-    STA $020A
-    LDA #100
-    STA $020B
-    STA posicionNaveEnemigaX
+    
 
 ;habilitar graficos
     LDA #%10000000
@@ -230,6 +222,7 @@ juegoPrincipal:
 
     ;logica del juego
     INC timer
+    INC timer2
     
     ;funciones primarias del juego
     JSR aparecerNaveEnemiga
@@ -254,12 +247,12 @@ juegoPrincipal:
 ;----------------------------------
 aparecerNaveEnemiga:
 
-    LDA timer
-    AND #%00111100 
-    BNE naveYaApacerida
-
     LDA estadoNaveEnemiga1
-    CMP #$01
+    CMP #$00
+    BEQ naveYaApacerida
+
+    LDA timer2
+    CMP #60
     BNE naveYaApacerida
 
     LDA #15
@@ -275,6 +268,7 @@ aparecerNaveEnemiga:
 
     LDA #$00
     STA estadoNaveEnemiga1
+    STA timer2
 
 naveYaApacerida:
     RTS
@@ -1142,6 +1136,20 @@ activarColisionNaveEnemiga:
     
     LDA #$01
     STA estadoNaveEnemiga1  ;;actualizar el estado de la nave a 1, que significa destruida
+
+        LDA #$00 ;;tomamos la ubicacion en y de la nave
+    STA $0204
+    LDA #$00
+    STA $0205
+    LDA #%00000000
+    STA $0206
+    LDA #$00  ;;tomamos la ubicacion de x, es igual que la nave
+    STA $0207
+
+    LDA #$00
+    STA posicionDisparoX
+    STA posicionDisparoY
+    STA estadoDeDisparo  ;;actualizamos el estado del disparo a 0, que significa que no hay disparp
 
     RTS
 
