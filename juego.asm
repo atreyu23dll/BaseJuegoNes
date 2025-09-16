@@ -46,7 +46,12 @@ posicionRayo4Y .rs 1
 posicionNaveEnemigaX .rs 1
 posicionNaveEnemigaY .rs 1
 
-scroll_y .rs 1
+posicionPrueba1_Y .rs 1
+posicionPrueba2_Y .rs 1
+posicionPrueba3_y .rs 1
+posicionPrueba4_y .rs 1
+
+timerDeActualizacion .rs 1
 
 
 
@@ -87,7 +92,7 @@ inicializarVariables:
     STA timer2
     STA vblank_occurred
     STA estadoDeDisparo
-    STA scroll_y
+    STA timerDeActualizacion
 
     LDA #$01
     STA estadoNaveEnemiga1
@@ -196,7 +201,57 @@ loopAtributos:
     LDA $0203
     STA posicionNaveX
 
-;aparecer nave enemiga
+;sprite de luna 1
+    LDA #0
+    STA $021C
+    LDA #$07
+    STA $021D
+    LDA #%00000010
+    STA $021E
+    LDA #100
+    STA $021F
+
+    LDA $021C
+    STA posicionPrueba1_Y
+
+;sprite de luna 2
+    LDA #0
+    STA $0220
+    LDA #$08
+    STA $0221
+    LDA #%00000010
+    STA $0222
+    LDA #108
+    STA $0223
+
+    LDA $0220
+    STA posicionPrueba2_Y
+
+;sprite de luna 3
+    LDA #8
+    STA $0224
+    LDA #23
+    STA $0225
+    LDA #%00000010
+    STA $0226
+    LDA #100
+    STA $0227
+
+    LDA $0224
+    STA posicionPrueba1_Y
+
+;sprite de luna 4
+     LDA #8
+    STA $0228
+    LDA #24
+    STA $0229
+    LDA #%00000010
+    STA $022A
+    LDA #108
+    STA $022B
+
+    LDA $0228
+    STA posicionPrueba4_y
 
     
 
@@ -223,6 +278,7 @@ juegoPrincipal:
     ;logica del juego
     INC timer
     INC timer2
+    INC timerDeActualizacion
     
     ;funciones primarias del juego
     JSR aparecerNaveEnemiga
@@ -235,6 +291,7 @@ juegoPrincipal:
     JSR checarColisionDisparo
     JSR generarNumeroAleatorioX
     JSR teletransportarseNaveEnemiga
+    JSR actualizarPrueba
 
     JMP juegoPrincipal
 
@@ -1095,8 +1152,40 @@ cambiarCicloGeneral:
     RTS
 
 ;------------------------------------------------
-;novena firma - metodo para aparecer nave enemiga
+; Metodo para actualizar prueba
 ;------------------------------------------------
+actualizarPrueba:
+    LDA timerDeActualizacion
+    CMP #30
+    BNE salirPrueba
+
+    ;suma de animacion
+    LDA $021C
+    CLC
+    ADC #$1
+    STA $021C
+
+    LDA $0220
+    CLC
+    ADC #$1
+    STA $0220
+
+    LDA $0224
+    CLC 
+    ADC #$1
+    STA $0224
+
+    LDA $0228
+    CLC 
+    ADC #$1
+    STA $0228
+
+    LDA #$00
+    STA timerDeActualizacion
+
+salirPrueba:
+
+    RTS
 
 ;-----------------------
 ;firmas de uso general
@@ -1166,10 +1255,8 @@ NMI:
 
     LDA #$00
     STA $2005
-    LDA scroll_y
     STA $2005
 
-    DEC scroll_y
 
     ; Transferir datos de sprites mediante DMA
     LDA #$00
@@ -1265,4 +1352,5 @@ fondo:
  .db $00, $00, $00, $00, $00, $00, $00, $00
  .db $C3, $24, $99, $42, $3C, $81, $42, $3C
 
-    .org $2000
+ CHRSprite:
+    .incbin "luna.chr"
